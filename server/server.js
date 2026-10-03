@@ -353,7 +353,12 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(clientDistPath, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`🌾 AgriIntel backend server running on http://localhost:${PORT}`);
-});
+// Export the Express API
+export default app;
+
+if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+  app.listen(PORT, () => {
+    console.log(`🌾 AgriIntel backend server running on http://localhost:${PORT}`);
+  });
+}
 
