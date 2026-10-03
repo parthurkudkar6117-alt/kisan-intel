@@ -26,6 +26,7 @@ import {
   Check
 } from 'lucide-react';
 import { useFarm } from '../context/FarmContext';
+import PlannerChatbot from './PlannerChatbot';
 
 export default function DailyPlanner() {
   const { profile, updateProfile, setIsProfileModalOpen } = useFarm();
@@ -453,6 +454,10 @@ export default function DailyPlanner() {
           </div>
         </div>
       )}
+      
+      {/* Advanced AI Farm Advisory Chatbot */}
+      <PlannerChatbot crop={activeCrop} cropStage={activeStage} location={profile.location} />
+      
     </div>
   );
 }

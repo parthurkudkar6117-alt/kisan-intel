@@ -96,6 +96,71 @@ app.post('/api/planner/generate', async (req, res) => {
   }
 });
 
+import { getAuthenticatedGovtAdvisory } from './services/governmentAdvisoryService.js';
+
+// Advanced AI Farm Advisory Chatbot
+app.post('/api/planner/ai-advisor', async (req, res) => {
+  try {
+    const { message, location, crop, cropStage } = req.body;
+    const locationName = location?.name || "Nashik, Maharashtra";
+    
+    // 1. Fetch Authenticated Govt Advisory
+    const govtAdvisory = await getAuthenticatedGovtAdvisory({
+      locationName,
+      crop: crop || "Tomato",
+      cropStage: cropStage || "Vegetative"
+    });
+
+    // 2. Prepare Gemini Prompt Grounded in Govt Data
+    const apiKey = req.headers['x-gemini-key'] || process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("Gemini API key is required.");
+    }
+    
+    const prompt = `You are a highly advanced Agricultural AI Chatbot strictly following official Indian government advisories.
+You are talking to a farmer growing ${crop || 'Tomato'} at the ${cropStage || 'Vegetative'} stage in ${locationName}.
+
+Official Grounding Data:
+- Authority: ${govtAdvisory.issuingAuthority}
+- Agro-Climatic Zone: ${govtAdvisory.agroClimaticZone}
+- Stage Alert: ${govtAdvisory.stageAlert || 'N/A'}
+- Weather Warning: ${govtAdvisory.weatherWarning || 'N/A'}
+- Official Recommendations: ${(govtAdvisory.officialRecommendations || []).join('; ')}
+
+Farmer's Question: "${message}"
+
+Respond directly, concisely, and professionally to the farmer's question. 
+Always cite the official government authority in your response (e.g., "According to IMD/ICAR...").
+If the question is unrelated to farming, politely redirect them.`;
+
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      })
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Gemini Chat API returned ${response.status}`);
+    }
+    
+    const result = await response.json();
+    const replyText = result.candidates?.[0]?.content?.parts?.[0]?.text || "I am currently unable to provide advice.";
+
+    res.json({
+      reply: replyText,
+      advisorySource: govtAdvisory.issuingAuthority,
+      isLiveWebScraped: govtAdvisory.isLiveWebScraped,
+      liveSourceNote: govtAdvisory.liveSourceNote
+    });
+  } catch (err) {
+    console.error("Planner AI Advisor Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Market Support: Commodities & APMCs list with Uni-Scrapper metadata
 app.get('/api/market/meta', (req, res) => {
   const allCommodities = Array.from(
