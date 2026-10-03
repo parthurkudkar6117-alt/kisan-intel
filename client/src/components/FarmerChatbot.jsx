@@ -252,8 +252,9 @@ export default function FarmerChatbot() {
               <div>
                 <div className="flex items-center gap-1.5">
                   <h3 className="text-sm font-extrabold tracking-tight">Kisan Sahayak</h3>
-                  <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold uppercase bg-emerald-500/30 text-emerald-200 border border-emerald-400/30">
-                    AI Agronomist
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 flex items-center gap-1">
+                    <Sparkles className="w-2.5 h-2.5 text-amber-300" />
+                    <span>Gemini 3.8 Flash</span>
                   </span>
                 </div>
                 <p className="text-[11px] text-emerald-200/80 flex items-center gap-1">

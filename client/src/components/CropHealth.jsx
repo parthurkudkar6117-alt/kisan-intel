@@ -195,7 +195,7 @@ export default function CropHealth() {
           {geminiApiKey ? (
             <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-purple-50 border border-purple-200 text-purple-800 text-xs font-semibold">
               <Sparkles className="w-4 h-4 text-purple-600" />
-              <span>Google Gemini Vision AI Active</span>
+              <span>Google Gemini 3.8 Flash Vision Active</span>
               <button
                 onClick={() => setShowKeyInput(!showKeyInput)}
                 className="underline text-[10px] text-purple-600 ml-1 hover:text-purple-800"
@@ -224,7 +224,7 @@ export default function CropHealth() {
           <div className="flex items-center justify-between">
             <span className="font-bold flex items-center gap-1.5">
               <Key className="w-4 h-4 text-purple-600" />
-              <span>Optional: Google Gemini 1.5/2.0 Flash Vision AI Key</span>
+              <span>Google Gemini 3.8 Flash Vision AI Key</span>
             </span>
             <button
               onClick={() => setShowKeyInput(false)}

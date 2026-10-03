@@ -8,6 +8,9 @@ import { PLANT_PATHOLOGY_DB } from './cropHealthService.js';
  * Falls back gracefully to comprehensive expert agronomic rules engine if Gemini API key is not configured.
  */
 
+const DEFAULT_GEMINI_KEY = process.env.GEMINI_API_KEY || "";
+const DEFAULT_GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+
 export async function handleFarmerChat({
   message = "",
   history = [],
@@ -15,7 +18,7 @@ export async function handleFarmerChat({
   language = "en", // 'en' or 'hi'
   geminiApiKey = null,
 }) {
-  const effectiveKey = geminiApiKey || process.env.GEMINI_API_KEY || null;
+  const effectiveKey = geminiApiKey || DEFAULT_GEMINI_KEY;
   const userQuery = message.trim();
   const crop = farmProfile.crop || "Tomato";
   const stage = farmProfile.cropStage || "Vegetative / Tillering";
@@ -61,7 +64,7 @@ export async function handleFarmerChat({
       if (geminiReply) {
         return {
           reply: geminiReply,
-          source: "Google Gemini 1.5 Flash grounded in live Open-Meteo & ICAR context",
+          source: "Google Gemini 3.8 Flash grounded in live Open-Meteo & ICAR context",
           isAi: true
         };
       }
@@ -136,7 +139,8 @@ RULES FOR YOUR RESPONSE:
     parts: [{ text: userQuery }]
   });
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const model = DEFAULT_GEMINI_MODEL;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },

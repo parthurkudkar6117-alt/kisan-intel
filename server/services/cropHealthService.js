@@ -237,6 +237,9 @@ export const PLANT_PATHOLOGY_DB = {
  * Analyzes crop image using Google Gemini Vision API (if key available)
  * or expert Plant Pathology Engine with strict UNSURE gating.
  */
+const DEFAULT_GEMINI_KEY = process.env.GEMINI_API_KEY || "";
+const DEFAULT_GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+
 export async function analyzeCropImage({
   imageBase64 = null,
   cropHint = "",
@@ -244,7 +247,7 @@ export async function analyzeCropImage({
   geminiApiKey = null,
   sampleId = null,
 }) {
-  const effectiveKey = geminiApiKey || process.env.GEMINI_API_KEY || null;
+  const effectiveKey = geminiApiKey || DEFAULT_GEMINI_KEY;
 
   // If a sample preset is requested for demonstration:
   if (sampleId && PLANT_PATHOLOGY_DB[sampleId]) {
@@ -337,7 +340,7 @@ Return strictly a valid JSON object matching this schema:
 Farmer context: Crop reported: ${cropHint || 'Unknown'}, Notes: ${symptomsObserved || 'None'}.
 `;
 
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${DEFAULT_GEMINI_MODEL}:generateContent?key=${apiKey}`;
   const response = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -376,7 +379,7 @@ Farmer context: Crop reported: ${cropHint || 'Unknown'}, Notes: ${symptomsObserv
 
   return {
     status: "DIAGNOSED",
-    source: "Google Gemini 1.5 Flash Vision AI grounded in ICAR Agronomic Taxonomy",
+    source: "Google Gemini 3.8 Flash Vision AI grounded in ICAR Agronomic Taxonomy",
     isAiVision: true,
     data: parsed
   };
