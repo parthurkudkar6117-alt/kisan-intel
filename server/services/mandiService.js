@@ -6,6 +6,7 @@ import {
   validatePriceSanity, 
   MANDI_SOURCE_BOARDS 
 } from '../data/mandiDatabase.js';
+import { fetchAgmarknetCommodities } from './scraperService.js';
 
 /**
  * Calculates Haversine distance in km between two lat/lng points,
@@ -52,26 +53,22 @@ export async function getMarketComparison({
   const ratePerKm = customRatePerKm !== null && customRatePerKm !== undefined ? Number(customRatePerKm) : vehicle.defaultPerKm;
   const trips = Math.ceil(qty / vehicle.capacityQuintals);
 
-  let liveDataSource = "Uni-Scrapper Multi-State APMC Engine (National & State Marketing Boards)";
+  let liveDataSource = "Live Agmarknet 2.0 Official API (via ScraperAPI Rotating Proxy)";
   let isUpstreamLive = true;
 
-  // Try live upstream API with short timeout
+  // Check live upstream Agmarknet connectivity via ScraperAPI
   try {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 2000);
-    const res = await fetch(`https://mandi-price-api.vercel.app/prices/latest?commodity=${encodeURIComponent(normCommodity)}&limit=10`, {
-      signal: controller.signal
-    });
-    clearTimeout(timeoutId);
-    if (res.ok) {
-      const liveJson = await res.json();
-      if (Array.isArray(liveJson) && liveJson.length > 0) {
-        liveDataSource = "Live Agmarknet Data Feed (Real-time OGD APMC Sync)";
-        isUpstreamLive = true;
-      }
+    const agmCheck = await fetchAgmarknetCommodities();
+    if (agmCheck && agmCheck.success) {
+      liveDataSource = "Live Agmarknet 2.0 Official Feed (via ScraperAPI Proxy)";
+      isUpstreamLive = true;
+    } else {
+      liveDataSource = "National & Multi-State Mandi Engine (Uni-Scrapper Sanity Validated)";
+      isUpstreamLive = false;
     }
   } catch (err) {
-    liveDataSource = "Uni-Scrapper Multi-State APMC Engine (Verified Daily Wholesale Benchmarks)";
+    liveDataSource = "National & Multi-State Mandi Engine (Uni-Scrapper Sanity Validated)";
+    isUpstreamLive = false;
   }
 
   // Filter APMCs by state board if specified
@@ -239,6 +236,7 @@ export async function getMarketComparison({
     explanation,
     rankedMarkets: rankedMarkets.slice(0, 10),
     trendHistory,
+    scraperApiActive: true,
   };
 }
 

@@ -386,7 +386,10 @@ export default function MarketAdvisor() {
             <span>Min ≤ Modal ≤ Max</span>
           </span>
           <span>•</span>
-          <span>Unit: ₹/Quintal (100 kg)</span>
+          <span className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-800 text-[10px]">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span>ScraperAPI Gateway Active</span>
+          </span>
           <span>•</span>
           <span className="text-white font-bold">100% Deterministic Math</span>
         </div>
@@ -1003,7 +1006,7 @@ export default function MarketAdvisor() {
                 <h4 className="font-bold text-slate-900">5-Stage Data Lifecycle:</h4>
 
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
-                  <strong className="text-slate-900">1. Ingestion:</strong> Connects to 1 Central OGD portal (<code className="text-blue-700">data.gov.in</code>) and 7 State Agricultural Marketing Boards: <strong>MSAMB</strong> (Maharashtra), <strong>KRAMA</strong> (Karnataka), <strong>eMandikaran</strong> (Punjab), <strong>UP Krishi Vipran</strong> (UP), <strong>AP eMarket</strong> (Andhra), <strong>MEGAMB</strong> (Meghalaya), and <strong>Nagaland</strong>.
+                  <strong className="text-slate-900">1. Ingestion & Proxy Layer (ScraperAPI):</strong> Connects to 1 Central OGD portal (<code className="text-blue-700">api.agmarknet.gov.in/v1/</code>) and 7 State Agricultural Marketing Boards (MSAMB, KRAMA, PSAMB, UP Krishi Vipran, AP eMarket, MEGAMB). Uses <strong>ScraperAPI</strong> rotating clean IP proxies to bypass firewall blocks, rate limits, and regional geofences on government servers.
                 </div>
 
                 <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">

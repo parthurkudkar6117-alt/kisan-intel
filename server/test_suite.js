@@ -215,6 +215,27 @@ async function runTestSuite() {
     assert(false, `Uni-Scrapper sanity validation test failed: ${e.message}`);
   }
 
+  // 13. ScraperAPI Gateway Integration Status
+  try {
+    const res = await fetch(`${baseUrl}/api/scraper/status`);
+    const data = await res.json();
+    assert(data.enabled === true, "ScraperAPI proxy gateway is enabled");
+    assert(data.maskedApiKey.includes("26d5f8"), "ScraperAPI key is configured correctly");
+    assert(data.upstreamPortals.length >= 3, "ScraperAPI monitors upstream agricultural portals (Agmarknet 2.0, MSAMB)");
+  } catch (e) {
+    assert(false, `ScraperAPI status test failed: ${e.message}`);
+  }
+
+  // 14. ScraperAPI Live Agmarknet 2.0 Catalog
+  try {
+    const res = await fetch(`${baseUrl}/api/scraper/agmarknet-commodities`);
+    const data = await res.json();
+    assert(data.success === true, "Live Agmarknet 2.0 commodities fetched via ScraperAPI");
+    assert(data.data && data.data.status === "success", "Agmarknet 2.0 API returned success response");
+  } catch (e) {
+    assert(false, `Live Agmarknet via ScraperAPI test failed: ${e.message}`);
+  }
+
   console.log(`\n========================================`);
 
   console.log(`Suite finished: ${passed} Passed, ${failed} Failed`);

@@ -8,6 +8,7 @@ import { searchLocations, getLiveWeatherForecast } from './services/weatherServi
 import { generateDailyPlan } from './services/plannerService.js';
 import { analyzeCropImage, PLANT_PATHOLOGY_DB } from './services/cropHealthService.js';
 import { handleFarmerChat } from './services/assistantService.js';
+import { getScraperApiStatus, fetchAgmarknetCommodities, fetchViaScraperApi } from './services/scraperService.js';
 
 dotenv.config();
 
@@ -147,6 +148,38 @@ app.get('/api/market/architecture', (req, res) => {
     supportedBoards: Object.values(MANDI_SOURCE_BOARDS),
     totalApmcsMonitored: APMC_MARKETS.length
   });
+});
+
+// ScraperAPI Gateway: Status & proxy health
+app.get('/api/scraper/status', async (req, res) => {
+  try {
+    const status = await getScraperApiStatus();
+    res.json(status);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ScraperAPI Gateway: Live Agmarknet 2.0 Commodities
+app.get('/api/scraper/agmarknet-commodities', async (req, res) => {
+  try {
+    const result = await fetchAgmarknetCommodities();
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ScraperAPI Gateway: Proxy institutional URL
+app.post('/api/scraper/proxy', async (req, res) => {
+  try {
+    const { url } = req.body;
+    if (!url) return res.status(400).json({ error: "URL is required" });
+    const result = await fetchViaScraperApi(url);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 // Market Support: Compare mandis & run sensitivity analysis
