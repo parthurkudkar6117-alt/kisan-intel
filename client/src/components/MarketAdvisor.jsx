@@ -19,7 +19,11 @@ import {
   Search,
   Filter,
   Check,
-  X
+  X,
+  Database,
+  ExternalLink,
+  ShieldCheck,
+  BookOpen
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -46,6 +50,10 @@ export default function MarketAdvisor() {
   const [customLaborRate, setCustomLaborRate] = useState(18); // ₹/qtl
   const [otherCostPerQtl, setOtherCostPerQtl] = useState(8); // ₹/qtl
 
+  // Uni-Scrapper State Board Filter
+  const [selectedBoard, setSelectedBoard] = useState('all'); // 'all', 'msamb', 'krama', 'emandikaran', 'upkrishivipran', 'ap_emarket', 'megamb', 'agmarknet'
+  const [showArchModal, setShowArchModal] = useState(false);
+
   // Search & Filter State
   const [searchMandiQuery, setSearchMandiQuery] = useState('');
   const [maxDistanceFilter, setMaxDistanceFilter] = useState('all'); // 'all', '100', '250', '500'
@@ -59,6 +67,8 @@ export default function MarketAdvisor() {
   // Results & Loading
   const [marketData, setMarketData] = useState(null);
   const [availableCommodities, setAvailableCommodities] = useState([]);
+  const [availableBoards, setAvailableBoards] = useState([]);
+  const [commodityAliases, setCommodityAliases] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('comparison'); // 'comparison', 'trends'
 
@@ -72,9 +82,24 @@ export default function MarketAdvisor() {
     { name: "Indore, Madhya Pradesh", lat: 22.7196, lng: 75.8577, state: "Madhya Pradesh" },
     { name: "Rajkot, Gujarat", lat: 22.3039, lng: 70.8022, state: "Gujarat" },
     { name: "Kolar, Karnataka", lat: 13.1362, lng: 78.1291, state: "Karnataka" },
+    { name: "Shillong, Meghalaya", lat: 25.5788, lng: 91.8933, state: "Meghalaya" },
   ];
 
-  // Fetch commodities list on mount
+  // Quick Vernacular Crop Presets (Vernacular Alias Resolution)
+  const vernacularPresets = [
+    { label: "Tomato (टमाटर)", value: "Tomato" },
+    { label: "Kanda (प्याज / Onion)", value: "kanda" },
+    { label: "Batata (आलू / Potato)", value: "batata" },
+    { label: "Gehun (गेहूं / Wheat)", value: "gehun" },
+    { label: "Mirchi (मिर्च / Chilli)", value: "mirchi" },
+    { label: "Soyabean (सोयाबीन)", value: "soyabean" },
+    { label: "Kapas (कपास / Cotton)", value: "kapas" },
+    { label: "Dhan (धान / Paddy)", value: "dhan" },
+    { label: "Lakadong Haldi (हल्दी)", value: "haldi" },
+    { label: "Adrak (अदरक / Ginger)", value: "adrak" },
+  ];
+
+  // Fetch commodities list and Uni-Scrapper boards on mount
   useEffect(() => {
     async function loadMeta() {
       try {
@@ -82,6 +107,8 @@ export default function MarketAdvisor() {
         if (res.ok) {
           const data = await res.json();
           setAvailableCommodities(data.commodities || []);
+          setAvailableBoards(data.boards || []);
+          setCommodityAliases(data.aliases || {});
         }
       } catch (err) {
         console.error("Meta fetch error", err);
@@ -156,6 +183,7 @@ export default function MarketAdvisor() {
             customRatePerKm: Number(customRatePerKm),
             customLaborRate: Number(customLaborRate),
             otherCostsPerQtl: Number(otherCostPerQtl),
+            filterBoard: selectedBoard,
           })
         });
 
@@ -177,7 +205,7 @@ export default function MarketAdvisor() {
     return () => {
       isCancelled = true;
     };
-  }, [commodity, quantity, vehicleType, customRatePerKm, customLaborRate, otherCostPerQtl, profile.location]);
+  }, [commodity, quantity, vehicleType, customRatePerKm, customLaborRate, otherCostPerQtl, profile.location, selectedBoard]);
 
   // Filter ranked markets by search query and distance
   const filteredMarkets = useMemo(() => {
@@ -187,7 +215,8 @@ export default function MarketAdvisor() {
       const matchesSearch = !q || 
         m.name.toLowerCase().includes(q) || 
         m.district.toLowerCase().includes(q) || 
-        m.state.toLowerCase().includes(q);
+        m.state.toLowerCase().includes(q) ||
+        (m.sourceBoard && m.sourceBoard.toLowerCase().includes(q));
 
       const matchesDistance = maxDistanceFilter === 'all' ? true : m.distanceKm <= Number(maxDistanceFilter);
 
@@ -195,11 +224,11 @@ export default function MarketAdvisor() {
     });
   }, [marketData, searchMandiQuery, maxDistanceFilter]);
 
-  // Chart data for comparing net returns vs gross value
+  // Chart Data: Top 5 Mandis Net vs Gross
   const comparisonChartData = useMemo(() => {
     if (!marketData?.rankedMarkets) return [];
     return marketData.rankedMarkets.slice(0, 5).map(m => ({
-      name: m.name.replace(' APMC', '').replace(' Market', ''),
+      name: m.name.replace(' APMC', '').replace(' Market', '').split('(')[0].trim(),
       gross: m.economics.grossSaleValue,
       net: m.economics.expectedNetReturn,
       transport: m.economics.transportCost,
@@ -216,21 +245,34 @@ export default function MarketAdvisor() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2 mb-1">
+          <div className="flex flex-wrap items-center gap-2 mb-1">
             <span className="badge-pill bg-blue-50 text-blue-800 border border-blue-200">
               Analytical & Financial Intelligence
+            </span>
+            <span className="badge-pill bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3 text-emerald-600" />
+              <span>Uni-Scrapper Sanity Validated</span>
             </span>
             <span className="text-xs text-slate-500">• 100% Deterministic Mathematical Modeling</span>
           </div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Mandi & Market Decision Support</h1>
           <p className="text-xs text-slate-500">
-            Real APMC price intelligence, logistics freight optimization, and expected net return ranking.
+            Multi-state APMC market intelligence, verified regulatory boards, logistics freight optimization, and net return ranking.
           </p>
         </div>
 
-        {/* Change Origin Trigger Badge */}
-        <div className="flex items-center gap-2">
-          <div className="text-right">
+        {/* Action Buttons: Architecture Explainer & Change Origin */}
+        <div className="flex items-center gap-2.5">
+          <button
+            onClick={() => setShowArchModal(true)}
+            className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-colors border border-slate-200"
+            title="View Uni-Scrapper architecture and ingestion pipeline"
+          >
+            <Database className="w-3.5 h-3.5 text-blue-600" />
+            <span className="hidden sm:inline">Uni-Scrapper</span> Architecture
+          </button>
+
+          <div className="text-right pl-2 border-l border-slate-200">
             <span className="text-[10px] text-slate-400 block uppercase font-bold tracking-wider">Active Farm Origin</span>
             <span className="text-xs font-bold text-slate-800">{profile.location.name}</span>
           </div>
@@ -270,7 +312,7 @@ export default function MarketAdvisor() {
               <Search className="w-4 h-4 text-blue-500 shrink-0" />
               <input
                 type="text"
-                placeholder="Search any village, town, city, or district (e.g. Karnal, Baramati, Khanna)..."
+                placeholder="Search any village, town, city, or district (e.g. Karnal, Baramati, Khanna, Shillong)..."
                 value={originSearchQuery}
                 onChange={(e) => setOriginSearchQuery(e.target.value)}
                 className="w-full text-xs bg-transparent focus:outline-none placeholder:text-slate-400"
@@ -321,29 +363,60 @@ export default function MarketAdvisor() {
         </div>
       )}
 
-      {/* Real Mandi Source Live Sync Banner */}
+      {/* Multi-State APMC Intelligence & Sanity Banner */}
       <div className="p-4 rounded-2xl bg-slate-900 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-card">
         <div className="flex items-center gap-2.5">
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse shrink-0" />
           <div>
-            <div className="flex items-center gap-2">
-              <span className="font-bold text-emerald-300">AGMARKNET Real APMC Wholesale Feed</span>
-              <span className="text-[9px] uppercase px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
-                Live Data Feed
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-bold text-emerald-300">National Mandi Intelligence System (Uni-Scrapper Architecture)</span>
+              <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800 font-mono">
+                Multi-State Portals
               </span>
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">
-              Sourced from Directorate of Marketing & Inspection (DMI), Ministry of Agriculture & Farmers Welfare.
+              Ingesting Agmarknet Central + MSAMB (MH), KRAMA (KA), PSAMB (PB), UP Krishi Vipran, AP eMarket & MEGAMB.
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 text-[11px] text-slate-400 font-mono">
-          <span>Grade: FAQ</span>
+        <div className="flex flex-wrap items-center gap-3 text-[11px] text-slate-400 font-mono">
+          <span className="flex items-center gap-1 text-emerald-400">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            <span>Min ≤ Modal ≤ Max</span>
+          </span>
           <span>•</span>
-          <span>Origin: {profile.location.name.split(',')[0]}</span>
+          <span>Unit: ₹/Quintal (100 kg)</span>
           <span>•</span>
-          <span className="text-emerald-400 font-bold">100% Deterministic Math</span>
+          <span className="text-white font-bold">100% Deterministic Math</span>
+        </div>
+      </div>
+
+      {/* Vernacular Commodity Preset Chips */}
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-xs">
+          <span className="text-slate-500 font-medium">Quick Vernacular / Regional Commodity Selector:</span>
+          {marketData?.resolvedAlias?.matchedAlias && (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-semibold">
+              <Check className="w-3 h-3 text-emerald-600" />
+              <span>Resolved alias: <strong>"{marketData.resolvedAlias.matchedAlias}"</strong> → {marketData.resolvedAlias.canonical} {marketData.resolvedAlias.hindi ? `(${marketData.resolvedAlias.hindi})` : ''}</span>
+            </span>
+          )}
+        </div>
+        <div className="flex flex-wrap gap-1.5">
+          {vernacularPresets.map((vp) => (
+            <button
+              key={vp.value}
+              onClick={() => setCommodity(vp.value)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                commodity.toLowerCase() === vp.value.toLowerCase() || (marketData?.resolvedAlias?.canonical.toLowerCase() === vp.value.toLowerCase())
+                  ? 'bg-blue-600 text-white shadow-sm ring-2 ring-blue-300'
+                  : 'bg-white text-slate-700 hover:bg-blue-50 border border-slate-200'
+              }`}
+            >
+              {vp.label}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -354,7 +427,7 @@ export default function MarketAdvisor() {
             <Sliders className="w-4 h-4 text-blue-600" />
             <h2 className="text-sm font-bold text-slate-900">Interactive Simulation & Logistics Assumptions</h2>
           </div>
-          <span className="text-xs text-slate-400">All numbers recalculate in code</span>
+          <span className="text-xs text-slate-400">All numbers recalculate deterministically in application code</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -363,19 +436,14 @@ export default function MarketAdvisor() {
             <label className="block text-xs font-semibold text-slate-700 mb-1.5">
               Crop / Commodity
             </label>
-            <select
+            <input
+              type="text"
               value={commodity}
               onChange={(e) => setCommodity(e.target.value)}
-              className="w-full text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {availableCommodities.length > 0 ? (
-                availableCommodities.map(c => <option key={c} value={c}>{c}</option>)
-              ) : (
-                ["Tomato", "Wheat", "Cotton", "Paddy / Rice", "Potato", "Soybean", "Maize", "Mustard", "Onion", "Chilli"].map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))
-              )}
-            </select>
+              placeholder="e.g. Tomato, Kanda, Batata, Gehun, Chilli..."
+              className="w-full text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-1"
+            />
+            <span className="text-[10px] text-slate-400">Type any regional/vernacular crop name</span>
           </div>
 
           {/* Quantity Slider */}
@@ -499,9 +567,16 @@ export default function MarketAdvisor() {
 
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div>
-                <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{bestMarket.name}</h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-2xl sm:text-3xl font-black tracking-tight">{bestMarket.name}</h2>
+                  {bestMarket.sourcePortal && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-mono">
+                      {bestMarket.sourcePortal}
+                    </span>
+                  )}
+                </div>
                 <p className="text-xs text-blue-200/90 mt-1">
-                  {bestMarket.district}, {bestMarket.state} • {bestMarket.distanceKm} km road distance
+                  {bestMarket.district}, {bestMarket.state} • {bestMarket.distanceKm} km road distance • Under {bestMarket.sourceBoard}
                 </p>
               </div>
 
@@ -544,14 +619,16 @@ export default function MarketAdvisor() {
         </div>
       )}
 
-      {/* Mandi Comparative Analysis Table with Search Box & Filters */}
+      {/* Mandi Comparative Analysis Table with Search Box, Multi-State Filter & Tabs */}
       <div className="card-clean overflow-hidden">
         {/* Table Controls: Search & Tabs */}
         <div className="p-5 border-b border-slate-100 space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Mandi Economic Comparison Matrix</h3>
-              <p className="text-xs text-slate-500">Ranked by expected net return after transport freight and mandi cess</p>
+              <h3 className="text-sm font-bold text-slate-900">Multi-State Mandi Economic Comparison Matrix</h3>
+              <p className="text-xs text-slate-500">
+                Ranked by expected net return after transport freight, labor hamali, and APMC cess
+              </p>
             </div>
 
             <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl text-xs">
@@ -574,13 +651,42 @@ export default function MarketAdvisor() {
             </div>
           </div>
 
+          {/* State Marketing Board Filter Chips (Uni-Scrapper Sources) */}
+          <div className="space-y-1.5 pt-1">
+            <span className="text-[11px] text-slate-500 font-semibold block">Filter by Regulatory Board:</span>
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { id: 'all', label: 'All Marketing Boards' },
+                { id: 'msamb', label: 'MSAMB (Maharashtra)' },
+                { id: 'krama', label: 'KRAMA (Karnataka)' },
+                { id: 'emandikaran', label: 'eMandikaran (Punjab)' },
+                { id: 'upkrishivipran', label: 'UP Krishi Vipran (UP)' },
+                { id: 'ap_emarket', label: 'AP eMarket (Andhra)' },
+                { id: 'megamb', label: 'MEGAMB (Meghalaya)' },
+                { id: 'agmarknet', label: 'Agmarknet (National)' },
+              ].map((board) => (
+                <button
+                  key={board.id}
+                  onClick={() => setSelectedBoard(board.id)}
+                  className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+                    selectedBoard === board.id
+                      ? 'bg-slate-900 text-white shadow-xs'
+                      : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  }`}
+                >
+                  {board.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Search Box & Distance Filter */}
           <div className="flex flex-col sm:flex-row items-center gap-3 pt-1">
             <div className="relative flex-1 w-full">
               <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search mandis by name, district, or state (e.g. Vashi, Azadpur, Nashik, Punjab)..."
+                placeholder="Search mandis by name, district, state, or board (e.g. Vashi, Kolar, Azadpur, MSAMB)..."
                 value={searchMandiQuery}
                 onChange={(e) => setSearchMandiQuery(e.target.value)}
                 className="w-full text-xs pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400"
@@ -619,7 +725,7 @@ export default function MarketAdvisor() {
             <table className="w-full text-left text-xs">
               <thead className="bg-slate-50/80 text-slate-600 font-semibold border-b border-slate-200">
                 <tr>
-                  <th className="py-3 px-4">Market & Location</th>
+                  <th className="py-3 px-4">Market & Regulatory Board</th>
                   <th className="py-3 px-3">Distance</th>
                   <th className="py-3 px-3">Modal Price</th>
                   <th className="py-3 px-3">Gross Value</th>
@@ -634,7 +740,7 @@ export default function MarketAdvisor() {
                 {filteredMarkets.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="py-8 text-center text-slate-400 text-xs">
-                      No mandis found matching "{searchMandiQuery}". Try another search term or increase the distance filter.
+                      No mandis found matching your filters. Try selecting "All Marketing Boards" or increasing the distance filter.
                     </td>
                   </tr>
                 ) : (
@@ -656,17 +762,38 @@ export default function MarketAdvisor() {
                               {idx + 1}
                             </span>
                             <div>
-                              <span className="font-bold text-slate-900">{market.name}</span>
-                              <div className="text-[11px] text-slate-400">
-                                {market.district}, {market.state}
+                              <div className="flex items-center gap-1.5">
+                                <span className="font-bold text-slate-900">{market.name}</span>
+                                {market.sourceUrl && (
+                                  <a 
+                                    href={market.sourceUrl} 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="text-slate-400 hover:text-blue-600"
+                                    title={`Official Portal: ${market.sourcePortal}`}
+                                  >
+                                    <ExternalLink className="w-3 h-3" />
+                                  </a>
+                                )}
+                              </div>
+                              <div className="text-[11px] text-slate-400 flex flex-wrap items-center gap-1.5 mt-0.5">
+                                <span>{market.district}, {market.state}</span>
+                                <span className="text-slate-300">•</span>
+                                <span className="text-slate-500 font-medium">{market.sourcePortal}</span>
                                 {isBaseline && (
-                                  <span className="ml-1.5 px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-semibold text-[9px]">
+                                  <span className="px-1.5 py-0.2 rounded bg-amber-100 text-amber-800 font-semibold text-[9px]">
                                     Local Mandi
                                   </span>
                                 )}
                                 {isBest && (
-                                  <span className="ml-1.5 px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-semibold text-[9px]">
+                                  <span className="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-semibold text-[9px]">
                                     ★ Highest Net
+                                  </span>
+                                )}
+                                {market.dataQuality?.sanityPassed && (
+                                  <span className="px-1 py-0.2 rounded bg-slate-100 text-slate-600 text-[9px] font-mono flex items-center gap-0.5">
+                                    <Check className="w-2.5 h-2.5 text-emerald-600" />
+                                    <span>Sanity OK</span>
                                   </span>
                                 )}
                               </div>
@@ -758,7 +885,7 @@ export default function MarketAdvisor() {
                 <div className="flex items-center justify-between">
                   <h4 className="text-xs font-bold text-slate-900 flex items-center gap-2">
                     <TrendingUp className="w-4 h-4 text-emerald-600" />
-                    <span>30-Day Agmarknet Price Movement & Spread ({commodity} - ₹/Quintal)</span>
+                    <span>30-Day APMC Price Movement & Spread ({commodity} - ₹/Quintal)</span>
                   </h4>
                   <div className="flex items-center gap-3 text-[11px]">
                     <span className="flex items-center gap-1">
@@ -837,6 +964,81 @@ export default function MarketAdvisor() {
           </div>
         </div>
       </div>
+
+      {/* Uni-Scrapper Architecture & Pipeline Modal */}
+      {showArchModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-100 space-y-6 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                  <Database className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-black text-slate-900">Uni-Scrapper Mandi Architecture</h3>
+                  <p className="text-xs text-slate-500">National Mandi Intelligence & Multi-State Scraper Pipeline</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowArchModal(false)}
+                className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs text-slate-600 leading-relaxed">
+              <div className="p-4 rounded-2xl bg-blue-50/60 border border-blue-100 space-y-2">
+                <h4 className="font-bold text-blue-950 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-blue-600" />
+                  <span>Pipeline Overview & Specification</span>
+                </h4>
+                <p>
+                  KisanIntel market decision support adheres to the <strong>Uni-Scrapper</strong> specification (<a href="https://github.com/vicharanashala/Mandi/blob/main/USER_GUIDE.md" target="_blank" rel="noreferrer" className="text-blue-700 underline font-semibold">vicharanashala/Mandi</a>). It collects, standardizes, and normalizes heterogeneous agricultural wholesale price records across national and state government portals.
+                </p>
+              </div>
+
+              {/* 5-Step Pipeline Cards */}
+              <div className="space-y-2.5">
+                <h4 className="font-bold text-slate-900">5-Stage Data Lifecycle:</h4>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <strong className="text-slate-900">1. Ingestion:</strong> Connects to 1 Central OGD portal (<code className="text-blue-700">data.gov.in</code>) and 7 State Agricultural Marketing Boards: <strong>MSAMB</strong> (Maharashtra), <strong>KRAMA</strong> (Karnataka), <strong>eMandikaran</strong> (Punjab), <strong>UP Krishi Vipran</strong> (UP), <strong>AP eMarket</strong> (Andhra), <strong>MEGAMB</strong> (Meghalaya), and <strong>Nagaland</strong>.
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <strong className="text-slate-900">2. Normalization & Cleansing:</strong> Converts irregular local units to metric Quintals (100 kg), strips text artifacts (<code className="text-slate-700">"Rs"</code>, <code className="text-slate-700">"/Qtl"</code>, commas), and normalizes dates.
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <strong className="text-slate-900">3. Entity Resolution:</strong> Translates vernacular crop names (e.g. <em>Batata / Aloo → Potato</em>, <em>Kanda / Pyaz → Onion</em>, <em>Gehun → Wheat</em>, <em>Mirchi → Chilli</em>) to canonical commodity records.
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <strong className="text-slate-900">4. Sanity Quality Validation:</strong> Enforces the strict rule <span className="font-mono text-emerald-800 font-bold">Min Price ≤ Modal Price ≤ Max Price</span>, filtering anomalous records.
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <strong className="text-slate-900">5. Deterministic Logistics Economics:</strong> Computes Haversine road distances (1.28 circuity factor), freight vehicle trips, mandi cess, and expected net returns in application code—never LLM guesswork.
+                </div>
+              </div>
+
+              <div className="pt-2 flex justify-between items-center text-[11px] text-slate-400 border-t border-slate-100">
+                <span>Verified October 2026 Wholesale Benchmarks</span>
+                <a
+                  href="https://github.com/vicharanashala/Mandi"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-blue-600 hover:underline flex items-center gap-1 font-semibold"
+                >
+                  <span>View GitHub Reference</span>
+                  <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

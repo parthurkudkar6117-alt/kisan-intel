@@ -160,6 +160,61 @@ async function runTestSuite() {
     assert(false, `Farmer chatbot test failed: ${e.message}`);
   }
 
+  // 9. Uni-Scrapper Multi-State Marketing Boards Meta
+  try {
+    const res = await fetch(`${baseUrl}/api/market/meta`);
+    const data = await res.json();
+    assert(data.boards && data.boards.length >= 7, "Uni-Scrapper includes 7+ state marketing boards");
+    assert(data.aliases && Object.keys(data.aliases).length >= 10, "Uni-Scrapper includes 10+ vernacular crop alias mappings");
+    const msamb = data.boards.find(b => b.id === "msamb");
+    assert(msamb && msamb.portal === "msamb.com", "MSAMB Maharashtra portal configured correctly");
+  } catch (e) {
+    assert(false, `Uni-Scrapper meta test failed: ${e.message}`);
+  }
+
+  // 10. Uni-Scrapper Vernacular Entity Resolution
+  try {
+    const res = await fetch(`${baseUrl}/api/market/resolve-alias?q=kanda`);
+    const data = await res.json();
+    assert(data.canonical === "Onion", "Vernacular alias 'kanda' resolves to 'Onion'");
+    assert(data.matchedAlias === "kanda", "Matched alias identified as 'kanda'");
+    assert(data.info && data.info.hindi.includes("प्याज"), "Returns Hindi script and transliteration for resolved commodity");
+  } catch (e) {
+    assert(false, `Vernacular entity resolution test failed: ${e.message}`);
+  }
+
+  // 11. Uni-Scrapper Architecture Documentation Endpoint
+  try {
+    const res = await fetch(`${baseUrl}/api/market/architecture`);
+    const data = await res.json();
+    assert(data.reference && data.reference.includes("vicharanashala/Mandi"), "References vicharanashala/Mandi architecture");
+    assert(data.pipelineSteps && data.pipelineSteps.length === 5, "Defines 5-step Uni-Scrapper data pipeline");
+  } catch (e) {
+    assert(false, `Architecture endpoint test failed: ${e.message}`);
+  }
+
+  // 12. Uni-Scrapper Sanity Quality Check (Min <= Modal <= Max) & Multi-State Filtering
+  try {
+    const res = await fetch(`${baseUrl}/api/market/compare`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        commodity: "kanda", // Regional vernacular term
+        quantity: 50,
+        farmerLat: 20.0110,
+        farmerLng: 73.7903,
+        farmerLocation: "Nashik, Maharashtra",
+        filterBoard: "msamb" // Filter specifically to MSAMB mandis
+      })
+    });
+    const data = await res.json();
+    assert(data.commodity === "Onion", "Commodity was resolved from 'kanda' to 'Onion'");
+    assert(data.rankedMarkets.every(m => m.sourceSystem === "msamb"), "All returned mandis belong to MSAMB board");
+    assert(data.rankedMarkets.every(m => m.dataQuality && m.dataQuality.sanityPassed === true), "All prices satisfy Uni-Scrapper sanity rule (Min <= Modal <= Max)");
+  } catch (e) {
+    assert(false, `Uni-Scrapper sanity validation test failed: ${e.message}`);
+  }
+
   console.log(`\n========================================`);
 
   console.log(`Suite finished: ${passed} Passed, ${failed} Failed`);

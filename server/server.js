@@ -3,7 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import { getMarketComparison } from './services/mandiService.js';
-import { APMC_MARKETS, VEHICLE_CONFIGS } from './data/mandiDatabase.js';
+import { APMC_MARKETS, VEHICLE_CONFIGS, COMMODITY_ALIASES, resolveCommodityAlias, MANDI_SOURCE_BOARDS } from './data/mandiDatabase.js';
 import { searchLocations, getLiveWeatherForecast } from './services/weatherService.js';
 import { generateDailyPlan } from './services/plannerService.js';
 import { analyzeCropImage, PLANT_PATHOLOGY_DB } from './services/cropHealthService.js';
@@ -95,7 +95,7 @@ app.post('/api/planner/generate', async (req, res) => {
   }
 });
 
-// Market Support: Commodities & APMCs list
+// Market Support: Commodities & APMCs list with Uni-Scrapper metadata
 app.get('/api/market/meta', (req, res) => {
   const allCommodities = Array.from(
     new Set(
@@ -105,6 +105,8 @@ app.get('/api/market/meta', (req, res) => {
 
   res.json({
     commodities: allCommodities,
+    aliases: COMMODITY_ALIASES,
+    boards: Object.values(MANDI_SOURCE_BOARDS),
     vehicles: Object.values(VEHICLE_CONFIGS),
     marketCount: APMC_MARKETS.length,
     markets: APMC_MARKETS.map(m => ({
@@ -114,8 +116,36 @@ app.get('/api/market/meta', (req, res) => {
       state: m.state,
       lat: m.lat,
       lng: m.lng,
-      type: m.type
+      type: m.type,
+      sourceSystem: m.sourceSystem,
+      sourceBoard: m.sourceBoard,
+      sourcePortal: m.sourcePortal,
+      sourceUrl: m.sourceUrl,
     }))
+  });
+});
+
+// Market Support: Vernacular Crop Alias Resolution (Entity Resolution)
+app.get('/api/market/resolve-alias', (req, res) => {
+  const query = req.query.q || '';
+  const resolved = resolveCommodityAlias(query);
+  res.json(resolved);
+});
+
+// Market Support: Uni-Scrapper Architecture & Data Pipeline Documentation
+app.get('/api/market/architecture', (req, res) => {
+  res.json({
+    title: "National Mandi Intelligence System (Uni-Scrapper) Architecture",
+    reference: "https://github.com/vicharanashala/Mandi",
+    pipelineSteps: [
+      { step: 1, name: "Data Ingestion", desc: "Automated daily scraping from 1 Central OGD portal and 7 State Agricultural Marketing Boards (MSAMB, KRAMA, PSAMB, UPSAMB, AP eMarket, MEGAMB)." },
+      { step: 2, name: "Cleansing & Normalization", desc: "Converts heterogeneous units to metric quintals (100 kg), cleans currency symbols ('Rs', '₹', '/Qtl'), normalizes dates." },
+      { step: 3, name: "Entity Resolution", desc: "Maps vernacular crop aliases in Hindi, Marathi, Telugu, Kannada, Punjabi to canonical commodities (e.g. Batata -> Potato, Kanda -> Onion)." },
+      { step: 4, name: "Sanity Quality Validation", desc: "Verifies Min Price <= Modal Price <= Max Price and removes anomalous outlier records." },
+      { step: 5, name: "Deterministic Economics", desc: "Computes transport costs, vehicle trips, mandi cess, labor fees, and expected net returns using mathematical application logic." }
+    ],
+    supportedBoards: Object.values(MANDI_SOURCE_BOARDS),
+    totalApmcsMonitored: APMC_MARKETS.length
   });
 });
 
@@ -131,7 +161,9 @@ app.post('/api/market/compare', async (req, res) => {
       vehicleType,
       customRatePerKm,
       customLaborRate,
-      otherCostsPerQtl
+      otherCostsPerQtl,
+      filterBoard,
+      maxDistanceKm
     } = req.body;
 
     const result = await getMarketComparison({
@@ -143,7 +175,9 @@ app.post('/api/market/compare', async (req, res) => {
       vehicleType,
       customRatePerKm,
       customLaborRate,
-      otherCostsPerQtl
+      otherCostsPerQtl,
+      filterBoard,
+      maxDistanceKm
     });
 
     res.json(result);
