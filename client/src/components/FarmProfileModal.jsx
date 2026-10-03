@@ -211,23 +211,23 @@ export default function FarmProfileModal() {
 
                 {/* Variety */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Variety / Hybrid</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Variety / Hybrid</label>
                   <input
                     type="text"
                     value={formData.variety || ''}
                     onChange={(e) => setFormData({ ...formData, variety: e.target.value })}
                     placeholder="e.g. Abhinav F1, HD-3226"
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
                   />
                 </div>
 
                 {/* Crop Stage */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Current Growth Stage</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Current Growth Stage</label>
                   <select
                     value={formData.cropStage}
                     onChange={(e) => setFormData({ ...formData, cropStage: e.target.value })}
-                    className="w-full text-xs font-medium px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-xs font-medium px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="Sowing & Germination">Sowing & Germination / Emergence</option>
                     <option value="Crown Root Initiation (CRI)">Crown Root Initiation (CRI) / Early Rooting</option>
@@ -240,12 +240,12 @@ export default function FarmProfileModal() {
 
                 {/* Sowing Date */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Sowing Date</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Sowing Date</label>
                   <input
                     type="date"
                     value={formData.sowingDate}
                     onChange={(e) => setFormData({ ...formData, sowingDate: e.target.value })}
-                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-xs px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
                   />
                 </div>
 
@@ -255,7 +255,7 @@ export default function FarmProfileModal() {
                   <select
                     value={formData.soilType}
                     onChange={(e) => setFormData({ ...formData, soilType: e.target.value })}
-                    className="w-full text-xs font-medium px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-xs font-medium px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="Loam">Medium Loam (Balanced retention)</option>
                     <option value="Clay / Black Cotton">Clay / Black Cotton Soil (High moisture retention)</option>
@@ -265,11 +265,11 @@ export default function FarmProfileModal() {
 
                 {/* Irrigation System */}
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">Irrigation Method</label>
+                  <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Irrigation Method</label>
                   <select
                     value={formData.irrigationType}
                     onChange={(e) => setFormData({ ...formData, irrigationType: e.target.value })}
-                    className="w-full text-xs font-medium px-3 py-2 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                    className="w-full text-xs font-medium px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                   >
                     <option value="Drip">Drip Irrigation (Micro-irrigation, 90% efficiency)</option>
                     <option value="Sprinkler">Sprinkler System (75% efficiency)</option>
@@ -280,19 +280,19 @@ export default function FarmProfileModal() {
               </div>
 
               {/* Flexible Location Search */}
-              <div className="pt-2 border-t border-slate-100">
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+              <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
+                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Farm Location (Any Indian/Global Village, City or District)
                 </label>
                 <div className="relative">
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50">
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
                     <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
                     <input
                       type="text"
                       placeholder="Type city or village name (e.g. Karnal, Baramati, Khanna, Kolar)..."
                       value={locationQuery}
                       onChange={(e) => setLocationQuery(e.target.value)}
-                      className="w-full text-xs bg-transparent focus:outline-none placeholder:text-slate-400"
+                      className="w-full text-xs bg-transparent text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium"
                     />
                     {isSearchingLocation && (
                       <span className="text-[10px] text-slate-400 animate-spin">⏳</span>
@@ -301,17 +301,17 @@ export default function FarmProfileModal() {
 
                   {/* Location suggestions dropdown */}
                   {locationResults.length > 0 && (
-                    <div className="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow-lg border border-slate-200 z-30 max-h-48 overflow-y-auto">
+                    <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 z-30 max-h-48 overflow-y-auto">
                       {locationResults.map((loc, idx) => (
                         <button
                           key={idx}
                           type="button"
                           onClick={() => handleSelectLocation(loc)}
-                          className="w-full text-left px-3 py-2 text-xs hover:bg-emerald-50 hover:text-emerald-900 border-b border-slate-100 last:border-0 flex items-center justify-between"
+                          className="w-full text-left px-3 py-2 text-xs hover:bg-emerald-50 dark:hover:bg-slate-700 hover:text-emerald-900 dark:hover:text-white border-b border-slate-100 dark:border-slate-700/60 last:border-0 flex items-center justify-between text-slate-800 dark:text-slate-200"
                         >
                           <div>
-                            <span className="font-semibold text-slate-800">{loc.name}</span>
-                            <span className="text-slate-500 ml-1.5">{loc.state}, {loc.country}</span>
+                            <span className="font-semibold text-slate-800 dark:text-slate-100">{loc.name}</span>
+                            <span className="text-slate-500 dark:text-slate-400 ml-1.5">{loc.state}, {loc.country}</span>
                           </div>
                           <span className="text-[10px] font-mono text-slate-400">
                             {loc.lat.toFixed(2)}, {loc.lng.toFixed(2)}
@@ -322,12 +322,12 @@ export default function FarmProfileModal() {
                   )}
                 </div>
 
-                <div className="mt-2 flex items-center justify-between px-3 py-2 bg-emerald-50/60 rounded-xl border border-emerald-100 text-xs">
-                  <div className="flex items-center gap-1.5 text-emerald-800">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                <div className="mt-2 flex items-center justify-between px-3 py-2 bg-emerald-50/60 dark:bg-emerald-950/40 rounded-xl border border-emerald-100 dark:border-emerald-900/40 text-xs">
+                  <div className="flex items-center gap-1.5 text-emerald-800 dark:text-emerald-300">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                     <span className="font-medium">Active: {formData.location.name}</span>
                   </div>
-                  <span className="font-mono text-[10px] text-emerald-700">
+                  <span className="font-mono text-[10px] text-emerald-700 dark:text-emerald-400">
                     GPS: {formData.location.lat.toFixed(3)}°N, {formData.location.lng.toFixed(3)}°E
                   </span>
                 </div>
@@ -337,12 +337,12 @@ export default function FarmProfileModal() {
 
           {activeTab === 'api' && (
             <div className="space-y-4">
-              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+              <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700">
                 <div className="flex items-center gap-2 mb-2">
                   <Key className="w-4 h-4 text-emerald-600" />
-                  <h4 className="text-xs font-bold text-slate-900">Google Gemini Vision AI Integration</h4>
+                  <h4 className="text-xs font-bold text-slate-900 dark:text-white">Google Gemini Vision AI Integration</h4>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed mb-3">
+                <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed mb-3">
                   KisanIntel has a built-in expert Plant Pathology rules engine that diagnoses 60+ crop conditions completely offline.
                   If you have a Google Gemini API Key, enter it below to enable live multimodal vision reasoning for uploaded leaf images.
                 </p>
@@ -351,9 +351,9 @@ export default function FarmProfileModal() {
                   placeholder="AIzaSy..."
                   value={apiKeyInput}
                   onChange={(e) => setApiKeyInput(e.target.value)}
-                  className="w-full text-xs font-mono px-3 py-2.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-2"
+                  className="w-full text-xs font-mono px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 mb-2"
                 />
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-slate-400 dark:text-slate-400">
                   Your key is stored only in your local browser session and transmitted securely to your local backend server.
                 </p>
               </div>

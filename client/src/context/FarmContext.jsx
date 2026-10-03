@@ -109,7 +109,7 @@ export function FarmProvider({ children }) {
   });
 
   const [geminiApiKey, setGeminiApiKeyState] = useState(() => {
-    return localStorage.getItem('kisan_gemini_api_key') || '';
+    return localStorage.getItem('kisan_gemini_api_key') || localStorage.getItem('gemini_api_key') || '';
   });
 
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -134,8 +134,10 @@ export function FarmProvider({ children }) {
     setGeminiApiKeyState(trimmed);
     if (trimmed) {
       localStorage.setItem('kisan_gemini_api_key', trimmed);
+      localStorage.setItem('gemini_api_key', trimmed);
     } else {
       localStorage.removeItem('kisan_gemini_api_key');
+      localStorage.removeItem('gemini_api_key');
     }
   };
 

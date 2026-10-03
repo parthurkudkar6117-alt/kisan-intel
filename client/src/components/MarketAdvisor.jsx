@@ -308,29 +308,29 @@ export default function MarketAdvisor() {
 
           {/* Search Origin Autocomplete */}
           <div className="relative">
-            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white border border-blue-200 shadow-sm">
+            <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-800 shadow-sm">
               <Search className="w-4 h-4 text-blue-500 shrink-0" />
               <input
                 type="text"
                 placeholder="Search any village, town, city, or district (e.g. Karnal, Baramati, Khanna, Shillong)..."
                 value={originSearchQuery}
                 onChange={(e) => setOriginSearchQuery(e.target.value)}
-                className="w-full text-xs bg-transparent focus:outline-none placeholder:text-slate-400"
+                className="w-full text-xs bg-transparent text-slate-900 dark:text-white focus:outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium"
               />
               {isSearchingOrigin && <RefreshCw className="w-3.5 h-3.5 text-blue-500 animate-spin" />}
             </div>
 
             {originSearchResults.length > 0 && (
-              <div className="absolute left-0 right-0 mt-1 bg-white rounded-xl shadow-xl border border-slate-200 z-30 max-h-48 overflow-y-auto">
+              <div className="absolute left-0 right-0 mt-1 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-30 max-h-48 overflow-y-auto">
                 {originSearchResults.map((loc, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSelectOrigin(loc)}
-                    className="w-full text-left px-3.5 py-2 text-xs hover:bg-blue-50 hover:text-blue-900 border-b border-slate-100 last:border-0 flex items-center justify-between"
+                    className="w-full text-left px-3.5 py-2 text-xs hover:bg-blue-50 dark:hover:bg-slate-700 hover:text-blue-900 dark:hover:text-white border-b border-slate-100 dark:border-slate-700/60 last:border-0 flex items-center justify-between text-slate-800 dark:text-slate-200"
                   >
                     <div>
-                      <span className="font-bold text-slate-800">{loc.name}</span>
-                      <span className="text-slate-500 ml-1.5">{loc.state}, {loc.country}</span>
+                      <span className="font-bold text-slate-800 dark:text-slate-100">{loc.name}</span>
+                      <span className="text-slate-500 dark:text-slate-400 ml-1.5">{loc.state}, {loc.country}</span>
                     </div>
                     <span className="font-mono text-[10px] text-slate-400">
                       {loc.lat.toFixed(2)}°N, {loc.lng.toFixed(2)}°E
@@ -444,9 +444,9 @@ export default function MarketAdvisor() {
               value={commodity}
               onChange={(e) => setCommodity(e.target.value)}
               placeholder="e.g. Tomato, Kanda, Batata, Gehun, Chilli..."
-              className="w-full text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 mb-1"
+              className="w-full text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 mb-1"
             />
-            <span className="text-[10px] text-slate-400">Type any regional/vernacular crop name</span>
+            <span className="text-[10px] text-slate-400 dark:text-slate-500">Type any regional/vernacular crop name</span>
           </div>
 
           {/* Quantity Slider */}
@@ -525,26 +525,26 @@ export default function MarketAdvisor() {
         {/* Cost adjustments toggle / secondary costs */}
         <div className="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4 text-xs">
           <div className="flex items-center gap-4">
-            <span className="text-slate-500 font-medium">Fine-tune charges:</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Fine-tune charges:</span>
             <div className="flex items-center gap-2">
-              <span className="text-slate-600">Hamali / Labor:</span>
+              <span className="text-slate-600 dark:text-slate-300">Hamali / Labor:</span>
               <input
                 type="number"
                 value={customLaborRate}
                 onChange={(e) => setCustomLaborRate(Number(e.target.value))}
-                className="w-16 px-2 py-1 text-xs rounded border border-slate-200 text-center font-bold"
+                className="w-16 px-2 py-1 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-center font-bold"
               />
-              <span className="text-slate-400">₹/qtl</span>
+              <span className="text-slate-400 dark:text-slate-500">₹/qtl</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-slate-600">Misc handling:</span>
+              <span className="text-slate-600 dark:text-slate-300">Misc handling:</span>
               <input
                 type="number"
                 value={otherCostPerQtl}
                 onChange={(e) => setOtherCostPerQtl(Number(e.target.value))}
-                className="w-16 px-2 py-1 text-xs rounded border border-slate-200 text-center font-bold"
+                className="w-16 px-2 py-1 text-xs rounded border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white text-center font-bold"
               />
-              <span className="text-slate-400">₹/qtl</span>
+              <span className="text-slate-400 dark:text-slate-500">₹/qtl</span>
             </div>
           </div>
 
@@ -692,7 +692,7 @@ export default function MarketAdvisor() {
                 placeholder="Search mandis by name, district, state, or board (e.g. Vashi, Kolar, Azadpur, MSAMB)..."
                 value={searchMandiQuery}
                 onChange={(e) => setSearchMandiQuery(e.target.value)}
-                className="w-full text-xs pl-9 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder:text-slate-400"
+                className="w-full text-xs pl-9 pr-4 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium"
               />
               {searchMandiQuery && (
                 <button

@@ -4,8 +4,19 @@
 
 @layer base {
   body {
-    @apply bg-[#FBFBFC] text-slate-800 antialiased;
+    @apply bg-[#FBFBFC] text-slate-800 antialiased dark:bg-slate-950 dark:text-slate-100;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* High-visibility contrast for all input bars, search boxes, and textareas */
+  input[type="text"],
+  input[type="password"],
+  input[type="date"],
+  input[type="number"],
+  input[type="search"],
+  textarea,
+  select {
+    @apply text-slate-900 placeholder:text-slate-400 dark:text-slate-100 dark:placeholder:text-slate-500;
   }
 }
 
@@ -28,15 +39,39 @@
   background: #94a3b8;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
 /* Apple/Google card styling utility */
 .card-clean {
-  @apply bg-white border border-slate-200/80 rounded-2xl shadow-subtle transition-all duration-200;
+  @apply bg-white border border-slate-200/80 rounded-2xl shadow-subtle transition-all duration-200 dark:bg-slate-900 dark:border-slate-800 dark:shadow-none;
 }
 
 .card-interactive {
-  @apply card-clean hover:border-slate-300 hover:shadow-card;
+  @apply card-clean hover:border-slate-300 hover:shadow-card dark:hover:border-slate-700;
 }
 
 .badge-pill {
   @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold tracking-tight;
+}
+
+/* Explicit high-contrast text rules for all input and search bars */
+input, textarea, select {
+  color: #0f172a;
+}
+
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  color: #f8fafc !important;
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #94a3b8 !important;
 }

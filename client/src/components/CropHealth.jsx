@@ -242,7 +242,7 @@ export default function CropHealth() {
               placeholder="AIzaSy..."
               value={keyDraft}
               onChange={(e) => setKeyDraft(e.target.value)}
-              className="flex-1 px-3 py-2 rounded-xl border border-purple-200 bg-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-purple-500"
+              className="flex-1 px-3 py-2 rounded-xl border border-purple-200 dark:border-purple-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-mono text-xs focus:outline-none focus:ring-2 focus:ring-purple-500 font-medium"
             />
             <button
               onClick={handleSaveKey}
@@ -326,7 +326,7 @@ export default function CropHealth() {
                 <select
                   value={cropHint}
                   onChange={(e) => setCropHint(e.target.value)}
-                  className="w-full text-xs font-bold px-2.5 py-1.5 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs font-bold px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 >
                   {["Tomato", "Wheat", "Cotton", "Paddy / Rice", "Potato", "Soybean", "Maize", "Mustard", "Onion", "Chilli"].map(c => (
                     <option key={c} value={c}>{c}</option>
@@ -335,7 +335,7 @@ export default function CropHealth() {
               </div>
 
               <div>
-                <label className="block text-[11px] font-semibold text-slate-700 mb-1">
+                <label className="block text-[11px] font-semibold text-slate-700 dark:text-slate-300 mb-1">
                   Observed Symptoms
                 </label>
                 <input
@@ -343,7 +343,7 @@ export default function CropHealth() {
                   placeholder="e.g. Yellow spots, curling"
                   value={symptomsObserved}
                   onChange={(e) => setSymptomsObserved(e.target.value)}
-                  className="w-full text-xs px-2.5 py-1.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full text-xs px-2.5 py-1.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 font-medium"
                 />
               </div>
             </div>

@@ -141,27 +141,27 @@ export default function DailyPlanner() {
 
         {/* Flexible Location Selector */}
         <div className="relative">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white shadow-subtle text-xs">
+          <div className="flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-subtle text-xs">
             <MapPin className="w-4 h-4 text-emerald-600 shrink-0" />
             <input
               type="text"
               placeholder={`Switch location (${profile.location.name})...`}
               value={locationInput}
               onChange={(e) => setLocationInput(e.target.value)}
-              className="text-xs bg-transparent focus:outline-none w-48 sm:w-60 placeholder:text-slate-400"
+              className="text-xs bg-transparent text-slate-900 dark:text-white focus:outline-none w-48 sm:w-60 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium"
             />
             {isSearchingLocation && <RefreshCw className="w-3 h-3 text-slate-400 animate-spin" />}
           </div>
 
           {locationResults.length > 0 && (
-            <div className="absolute right-0 mt-1 w-72 bg-white rounded-xl shadow-xl border border-slate-200 z-30 max-h-48 overflow-y-auto">
+            <div className="absolute right-0 mt-1 w-72 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-30 max-h-48 overflow-y-auto">
               {locationResults.map((loc, idx) => (
                 <button
                   key={idx}
                   onClick={() => handleSelectLocation(loc)}
-                  className="w-full text-left px-3 py-2 text-xs hover:bg-emerald-50 hover:text-emerald-900 border-b border-slate-100 last:border-0 flex items-center justify-between"
+                  className="w-full text-left px-3 py-2 text-xs hover:bg-emerald-50 dark:hover:bg-slate-700 hover:text-emerald-900 dark:hover:text-white border-b border-slate-100 dark:border-slate-700/60 last:border-0 flex items-center justify-between text-slate-800 dark:text-slate-200"
                 >
-                  <span className="font-semibold">{loc.name}, {loc.state}</span>
+                  <span className="font-semibold text-slate-800 dark:text-slate-100">{loc.name}, {loc.state}</span>
                   <span className="text-[10px] text-slate-400 font-mono">{loc.lat.toFixed(1)}°N</span>
                 </button>
               ))}

@@ -27,17 +27,19 @@ export default function PlannerChatbot({ crop, cropStage, location }) {
     setIsTyping(true);
 
     try {
+      const activeKey = localStorage.getItem('kisan_gemini_api_key') || localStorage.getItem('gemini_api_key') || '';
       const res = await fetch('/api/planner/ai-advisor', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-gemini-key': localStorage.getItem('gemini_api_key') || ''
+          'x-gemini-key': activeKey
         },
         body: JSON.stringify({
           message: input,
           crop: activeCrop,
           cropStage: activeStage,
-          location: activeLocation
+          location: activeLocation,
+          geminiApiKey: activeKey
         })
       });
 
@@ -157,7 +159,7 @@ export default function PlannerChatbot({ crop, cropStage, location }) {
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={`Ask about ${activeCrop} in ${activeLocation?.name?.split(',')[0]}...`}
-            className="w-full bg-slate-50 dark:bg-slate-950/50 border border-slate-200 dark:border-slate-700 rounded-full pl-5 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 transition-all dark:text-white"
+            className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-700 rounded-full pl-5 pr-12 py-3 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all font-medium"
           />
           <button
             type="submit"
