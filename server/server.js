@@ -369,9 +369,14 @@ app.get('*', (req, res, next) => {
 // Export the Express API
 export default app;
 
-if (process.env.NODE_ENV !== 'production' || process.env.VERCEL !== '1') {
+const isDirectRun = process.argv[1] && (
+  process.argv[1].endsWith('server.js') || 
+  process.argv[1].includes('server.js')
+) && !process.env.VERCEL;
+
+if (isDirectRun) {
   app.listen(PORT, () => {
-    console.log(`🌾 AgriIntel backend server running on http://localhost:${PORT}`);
+    console.log(`🌾 KisanAI backend server running on http://localhost:${PORT}`);
   });
 }
 
